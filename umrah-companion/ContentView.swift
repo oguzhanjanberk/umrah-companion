@@ -18,7 +18,7 @@ struct ContentView: View {
 
                 VStack(spacing: 24) {
                     VStack(spacing: 8) {
-                        Text("Umrah Companion")
+                        Text("Umrah Companion by ozzy just testing as i changed the project name and it was messing up")
                             .font(.system(size: 32, weight: .heavy))
                             .foregroundStyle(AppTheme.primaryText)
                         Text("Count your circuits. Keep your duas close.")
