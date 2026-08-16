@@ -17,6 +17,7 @@ struct SessionView: View {
     let queue: [Dua]
 
     @Environment(AppSettings.self) private var settings
+    @Environment(SessionStore.self) private var sessions
     @Environment(\.dismiss) private var dismiss
 
     @State private var count = 0
@@ -54,7 +55,7 @@ struct SessionView: View {
         .preferredColorScheme(.light)
         .navigationBarBackButtonHidden(true)
         .onAppear(perform: enableIdleTimerIfNeeded)
-        .onDisappear(perform: restoreIdleTimer)
+        .onDisappear(perform: endSession)
     }
 
     // MARK: Header
@@ -63,7 +64,7 @@ struct SessionView: View {
         HStack(alignment: .top) {
             Button(action: { dismiss() }) {
                 Label("Done", systemImage: "chevron.left")
-                    .font(.system(size: 17, weight: .semibold))
+                    .font(AppTheme.sans(17, weight: .semibold))
                     .foregroundStyle(AppTheme.accent)
             }
             .buttonStyle(.plain)
@@ -72,11 +73,11 @@ struct SessionView: View {
 
             VStack(spacing: 2) {
                 Text(mode.title)
-                    .font(.system(size: 17, weight: .bold))
+                    .font(AppTheme.serif(18, weight: .semibold))
                     .foregroundStyle(AppTheme.primaryText)
                 if !queue.isEmpty {
                     Text("Dua \(index + 1) of \(queue.count)")
-                        .font(.system(size: 13, weight: .medium))
+                        .font(AppTheme.sans(13, weight: .medium))
                         .foregroundStyle(AppTheme.secondaryText)
                 }
             }
@@ -107,7 +108,7 @@ struct SessionView: View {
 
             Button(action: next) {
                 Text("Next")
-                    .font(.system(size: 24, weight: .bold))
+                    .font(AppTheme.serif(24, weight: .semibold))
                     .frame(maxWidth: .infinity)
                     .frame(height: 68)
                     .background(RoundedRectangle(cornerRadius: 18).fill(AppTheme.accent))
@@ -152,6 +153,12 @@ struct SessionView: View {
         UIApplication.shared.isIdleTimerDisabled = false
         #endif
     }
+
+    /// Saves the session for the dashboard, then restores the idle timer.
+    private func endSession() {
+        sessions.record(mode: mode, count: count)
+        restoreIdleTimer()
+    }
 }
 
 // MARK: - Dua Reader
@@ -183,9 +190,9 @@ struct DuaReaderView: View {
     @ViewBuilder
     private func content(for dua: Dua) -> some View {
         Text(dua.title.uppercased())
-            .font(.system(size: 14, weight: .bold))
+            .font(AppTheme.sans(14, weight: .bold))
             .tracking(1.5)
-            .foregroundStyle(AppTheme.accent)
+            .foregroundStyle(AppTheme.gold)
 
         if settings.showArabic {
             Text(dua.arabic)
@@ -214,14 +221,14 @@ struct DuaReaderView: View {
 
         if let reference = dua.reference {
             Text(reference)
-                .font(.system(size: 14, weight: .medium))
+                .font(AppTheme.sans(14, weight: .medium))
                 .foregroundStyle(AppTheme.secondaryText)
                 .padding(.top, 4)
         }
 
         if !settings.hasAtLeastOneScript {
             Text("All scripts are hidden — enable at least one in Settings.")
-                .font(.system(size: 15, weight: .medium))
+                .font(AppTheme.sans(15, weight: .medium))
                 .foregroundStyle(.orange)
                 .multilineTextAlignment(.center)
         }
@@ -233,10 +240,10 @@ struct DuaReaderView: View {
                 .font(.system(size: 44))
                 .foregroundStyle(AppTheme.accent)
             Text("No duas selected")
-                .font(.system(size: 22, weight: .bold))
+                .font(AppTheme.serif(23, weight: .semibold))
                 .foregroundStyle(AppTheme.primaryText)
             Text("Use the counter and make your own dua, or go back to add some to your queue.")
-                .font(.system(size: 17, weight: .medium))
+                .font(AppTheme.sans(17, weight: .medium))
                 .foregroundStyle(AppTheme.secondaryText)
                 .multilineTextAlignment(.center)
         }

@@ -10,7 +10,6 @@ import SwiftUI
 
 struct SettingsView: View {
     @Environment(AppSettings.self) private var settings
-    @Environment(\.dismiss) private var dismiss
 
     /// A representative dua so the user sees their choices applied live.
     private let previewDua = DuaLibrary.byID["tawaf_corners"]!
@@ -55,7 +54,7 @@ struct SettingsView: View {
                 Section {
                     VStack(alignment: .leading, spacing: 6) {
                         Text("Umrah Companion")
-                            .font(.headline)
+                            .font(AppTheme.serif(18, weight: .semibold))
                         Text("Works fully offline. No account, no tracking.")
                             .font(.footnote)
                             .foregroundStyle(.secondary)
@@ -65,11 +64,6 @@ struct SettingsView: View {
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") { dismiss() }
-                }
-            }
         }
     }
 }

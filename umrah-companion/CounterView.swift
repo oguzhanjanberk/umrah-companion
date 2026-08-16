@@ -27,14 +27,14 @@ struct CounterView: View {
                         .monospacedDigit()
                         .contentTransition(.numericText(value: Double(count)))
                     Text("of \(mode.target)")
-                        .font(.system(size: 13, weight: .semibold))
+                        .font(AppTheme.sans(13, weight: .semibold))
                         .opacity(0.9)
                 }
                 .foregroundStyle(.white)
                 .frame(width: 96, height: 96)
                 .background(
                     Circle()
-                        .fill(isComplete ? Color.green : AppTheme.accent)
+                        .fill(isComplete ? AppTheme.gold : AppTheme.accent)
                 )
                 .overlay(
                     Circle()
@@ -43,7 +43,7 @@ struct CounterView: View {
                 .overlay(
                     // Expanding ring cue when a completion happens.
                     Circle()
-                        .stroke(Color.green, lineWidth: 4)
+                        .stroke(AppTheme.gold, lineWidth: 4)
                         .scaleEffect(pulse ? 1.6 : 1.0)
                         .opacity(pulse ? 0 : 0.8)
                 )
@@ -56,8 +56,8 @@ struct CounterView: View {
 
             if isComplete {
                 Text("Complete ✓")
-                    .font(.system(size: 15, weight: .bold))
-                    .foregroundStyle(.green)
+                    .font(AppTheme.sans(15, weight: .bold))
+                    .foregroundStyle(AppTheme.accent)
                     .transition(.opacity)
             }
 
@@ -65,7 +65,7 @@ struct CounterView: View {
             if count > 0 {
                 Button(action: undo) {
                     Label("Undo", systemImage: "arrow.uturn.backward")
-                        .font(.system(size: 15, weight: .semibold))
+                        .font(AppTheme.sans(15, weight: .semibold))
                         .padding(.horizontal, 14)
                         .padding(.vertical, 8)
                         .background(Capsule().fill(AppTheme.surface))

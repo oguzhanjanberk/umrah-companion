@@ -29,7 +29,7 @@ struct DuaSelectionView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 28) {
                     Text("Tap duas to add them to your queue. They'll appear in the order you pick them.")
-                        .font(.system(size: 16, weight: .medium))
+                        .font(AppTheme.sans(16, weight: .medium))
                         .foregroundStyle(AppTheme.secondaryText)
                         .padding(.top, 4)
 
@@ -54,7 +54,7 @@ struct DuaSelectionView: View {
                 }
             }
         }
-        .navigationDestination(isPresented: $startSession) {
+        .fullScreenCover(isPresented: $startSession) {
             SessionView(mode: mode, queue: queues.duas(for: mode))
         }
     }
@@ -64,7 +64,7 @@ struct DuaSelectionView: View {
     private func categorySection(_ category: DuaCategory) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             Label(category.rawValue, systemImage: category.systemImage)
-                .font(.system(size: 20, weight: .bold))
+                .font(AppTheme.serif(22, weight: .semibold))
                 .foregroundStyle(AppTheme.primaryText)
 
             ForEach(DuaLibrary.duas(in: category)) { dua in
@@ -86,10 +86,10 @@ struct DuaSelectionView: View {
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(dua.title)
-                        .font(.system(size: 18, weight: .semibold))
+                        .font(AppTheme.serif(19, weight: .medium))
                         .foregroundStyle(AppTheme.primaryText)
                     Text(dua.english)
-                        .font(.system(size: 15, weight: .regular))
+                        .font(AppTheme.sans(15, weight: .regular))
                         .foregroundStyle(AppTheme.secondaryText)
                         .lineLimit(2)
                         .multilineTextAlignment(.leading)
@@ -123,7 +123,7 @@ struct DuaSelectionView: View {
                     Image(systemName: mode.systemImage)
                     Text(selectedCount > 0 ? "Begin \(mode.title) · \(selectedCount) duas" : "Begin \(mode.title)")
                 }
-                .font(.system(size: 22, weight: .bold))
+                .font(AppTheme.serif(22, weight: .semibold))
                 .frame(maxWidth: .infinity)
                 .frame(height: 64)
                 .background(RoundedRectangle(cornerRadius: 18).fill(AppTheme.accent))

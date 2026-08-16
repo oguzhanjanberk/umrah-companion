@@ -222,3 +222,99 @@ final class QueueStore {
         ids(for: mode).compactMap { DuaLibrary.byID[$0] }
     }
 }
+
+// MARK: - Session Record
+
+/// One finished ritual session, saved to build the dashboard's history.
+struct SessionRecord: Identifiable, Codable, Hashable {
+    let id: UUID
+    let mode: PilgrimageMode
+    /// Circuits/laps counted in this session (may be fewer than the target).
+    let count: Int
+    /// Whether the counter reached the mode's target of seven.
+    let completed: Bool
+    let date: Date
+}
+
+// MARK: - Session Store
+
+/// Records completed sessions and derives the dashboard statistics from them,
+/// persisted as JSON in `UserDefaults`.
+@Observable
+final class SessionStore {
+    private(set) var records: [SessionRecord] { didSet { persist() } }
+
+    private let defaults = UserDefaults.standard
+    private static let storageKey = "sessionRecords"
+
+    init() {
+        if let data = defaults.data(forKey: Self.storageKey),
+           let decoded = try? JSONDecoder().decode([SessionRecord].self, from: data) {
+            records = decoded
+        } else {
+            records = []
+        }
+    }
+
+    private func persist() {
+        if let data = try? JSONEncoder().encode(records) {
+            defaults.set(data, forKey: Self.storageKey)
+        }
+    }
+
+    /// Logs a session's final count. Sessions with no counts are ignored so the
+    /// dashboard reflects real activity only.
+    func record(mode: PilgrimageMode, count: Int) {
+        guard count > 0 else { return }
+        records.append(
+            SessionRecord(
+                id: UUID(),
+                mode: mode,
+                count: count,
+                completed: count >= mode.target,
+                date: Date()
+            )
+        )
+    }
+
+    // MARK: Derived statistics
+
+    /// Number of sessions of a mode that reached the target of seven.
+    func completedCount(for mode: PilgrimageMode) -> Int {
+        records.filter { $0.mode == mode && $0.completed }.count
+    }
+
+    /// Lifetime sum of circuits (Tawaf) or laps (Sa'i) counted across all sessions.
+    func totalCount(for mode: PilgrimageMode) -> Int {
+        records.filter { $0.mode == mode }.reduce(0) { $0 + $1.count }
+    }
+
+    /// The most recent session across both modes, if any.
+    var lastSessionDate: Date? {
+        records.map(\.date).max()
+    }
+
+    /// Consecutive calendar days (ending today or yesterday) with at least one
+    /// session. Zero if the most recent session is older than yesterday.
+    var currentStreak: Int {
+        let calendar = Calendar.current
+        let days = Set(records.map { calendar.startOfDay(for: $0.date) })
+        guard !days.isEmpty else { return 0 }
+
+        var day = calendar.startOfDay(for: Date())
+        // Allow the streak to still count if the last session was yesterday.
+        if !days.contains(day) {
+            guard let yesterday = calendar.date(byAdding: .day, value: -1, to: day),
+                  days.contains(yesterday) else { return 0 }
+            day = yesterday
+        }
+
+        var streak = 0
+        while days.contains(day) {
+            streak += 1
+            guard let previous = calendar.date(byAdding: .day, value: -1, to: day) else { break }
+            day = previous
+        }
+        return streak
+    }
+}
